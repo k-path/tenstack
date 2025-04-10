@@ -2,8 +2,8 @@ CC = gcc
 CFLAGS = -Wall -Iinclude
 SRCDIR = src
 
-tap: $(SRCDIR)/tap.c 
-	$(CC) $(CFLAGS) $< -o $@   
+tap: $(SRCDIR)/tap.c $(SRCDIR)/utils.c 
+	$(CC) $(CFLAGS) $^ -o $@   
   # gcc -Wall -Iinclude src/tap.c -o tap
 
 clean:

@@ -9,6 +9,9 @@
 #include <linux/if_tun.h>
 
 #include "ethernet.h"
+#include "utils.h"
+
+
 
 /*
  * alloc_tap: Initialize and configure a TAP device
@@ -17,46 +20,96 @@
  */
 int alloc_tap(char *dev) {
     struct ifreq ifr;
-    int tapfd, err;
+    int tapfd;
 
     // open the tun/tap device
     if ((tapfd = open("/dev/net/tun", O_RDWR)) < 0) {
         perror("Cannot open TUN/TAP device\nMake sure one exists with '$ mknod /dev/net/tun c 10 200'");
-        exit(1);
+        return -1; // return -1 instead of exit(1) since this is a utility function which shouldnt make decisions abt terminating the entire program
     }
     
     // initialize the interface request structure
     memset(&ifr, 0x0, sizeof(ifr));
+
+     // IFF_TAP = Layer 2 (Ethernet) device, IFF_NO_PI = No extra packet info
     ifr.ifr_flags = IFF_TAP | IFF_NO_PI;
 
-    // copy device name to request if one is provided
+    // copy device name to request, if one is provided
     if (*dev) {
         strncpy(ifr.ifr_name, dev, IFNAMSIZ);
     }
 
     // configure the TUN/TAP device using ioctl
-    if ( (err = ioctl(tapfd, TUNSETIFF, (void *)&ifr)) < 0) {
+    if (ioctl(tapfd, TUNSETIFF, (void *)&ifr) < 0) {
         perror("ERR: Could not ioctl tun");
         close(tapfd);
-        return err;
+        return -1;
     }
-
+    
+    // copy device name (handles case where device name not specified and kernel assigned one)
+    strncpy(dev, ifr.ifr_name, IFNAMSIZ);
     return tapfd;
 }
 
-// set IP address on the TAP device, set the nestmask, bring the interface up
-int configure_tap(char *dev, char *ip, char *netmask) {
-    char cmd[256];
+/* sets IP address on the TAP if */
+int set_ipaddr(char *dev, char *cidr) {
+    return run_cmd("ip addr add %s dev %s", cidr, dev);
+}
 
-    // set IP address and netmask
-    snprintf(cmd, sizeof(cmd), "ip addr add %s/%s dev %s", ip, netmask, dev);
-    system(cmd);
+/* adds a route via TAP if */
+int set_route(char *dev, char *cidr) {
+    return run_cmd("ip route add %s dev %s", cidr, dev);
+}
 
-    // bring interface up
-    snprintf(cmd, sizeof(cmd), "ip link set dev %s up", dev);
-    system(cmd);
+/* Brings up the TAP if */
+int set_up_if(char *dev) {
+    return run_cmd("ip link set dev %s up", dev);
+}
 
+int configure_tap(char *dev, char *cidr) {
+    // sets up IP address on TAP device
+    if (set_ipaddr(dev, cidr) != 0) {
+        fprintf(stderr,"Error setting TAP address\n");
+    }
+
+    // brings up the interface
+    if (set_up_if(dev) != 0) {
+        fprintf(stderr, "Error bringing up TAP interface\n");
+    }
+    
+    /* set_route(dev, cidr); // not adding by default */  
     return 0;
+}
+
+int setup_network_if(char *tap_name, int choose_name, char *cidr) {
+    char dev[IFNAMSIZ];
+    int tapfd;
+
+    // if specific name is requested, use it, or we just let kernel choose
+    if (!choose_name && tap_name) {
+        strncpy(dev, tap_name, IFNAMSIZ - 1);
+        dev[IFNAMSIZ - 1] = '\0'; // make sure to null terminate
+    } else {
+        dev[0] = '\0';
+    }
+
+    // create TAP interface
+    tapfd = alloc_tap(dev);
+    if (tapfd < 0) {
+        fprintf(stderr, "Failed to create TAP device\n");
+        return -1;
+    }
+
+    printf("TAP device %s initialized\n", dev);
+
+    // configure the interface
+    if (configure_tap(dev, cidr) != 0) {
+        fprintf(stderr, "Failed to configure TAP device\n");
+        close(tapfd);
+        return -1;
+    }
+
+    return tapfd;
 }
 
 // read raw data from TAP device
@@ -64,17 +117,20 @@ int tap_read(int tapfd, unsigned char *buffer, int len) {
     return read(tapfd, buffer, len);
 }
 
+// 
+// int tap_write(int tapfd, unsigned char *buffer, int len) {
+//     return write(tapfd, buffer, len);
+// }
+
 int main() {
-    char tap_name[IFNAMSIZ] = "tap0";
     int tapfd;
+    char tap_name[IFNAMSIZ] = "tap0";
+
+    tapfd = setup_network_if(tap_name, 0, "192.168.1.1/24");
     unsigned char buffer[2048];
     int nread;
 
-    // allocate and configure tap device
-    tapfd = alloc_tap(tap_name);
-    configure_tap(tap_name, "192.168.1.1", "24");
-
-    printf("TAP device %s initialized. Starting packet loop...\n", tap_name);
+    printf("Starting packet loop...\n");
 
     while (1) {
         nread = tap_read(tapfd, buffer, sizeof(buffer));
@@ -98,14 +154,7 @@ int main() {
     
 }
 
-// 
-// int tap_write(int tapfd, unsigned char *buffer, int len) {
-//     return write(tapfd, buffer, len);
-// }
 
-// int setup_tap_device() {
-
-// }
 
 // int close_tap() {
 
