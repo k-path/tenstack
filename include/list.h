@@ -50,7 +50,7 @@ static inline void list_del(list_head *elem) {
 
 /* Get pointer to the containing struct from a pointer to a member within the containing struct */
 #define container_of(ptr, type, member) \
-    ((type *) ((char *) (ptr) - offsetof(type, member)))
+    ((type *) ((char *) (ptr) - offsetof(type, member))) // take address of ptr node, determines how far that node is from start of its containing struct, substract that offset to get the base address of the full struct
 
 /* Get pointer to the containing list struct from the list linkage which is within the containing list. So we can access other data fields */
 #define list_entry(ptr, type, member) \

@@ -52,17 +52,17 @@ int alloc_tap(char *dev) {
 }
 
 /* sets IP address on the TAP if */
-int set_ipaddr(char *dev, char *cidr) {
+static int set_ipaddr(char *dev, char *cidr) {
     return run_cmd("ip addr add %s dev %s", cidr, dev);
 }
 
 /* adds a route via TAP if */
-int set_route(char *dev, char *cidr) {
+static int set_route(char *dev, char *cidr) {
     return run_cmd("ip route add %s dev %s", cidr, dev);
 }
 
 /* Brings up the TAP if */
-int set_up_if(char *dev) {
+static int set_up_if(char *dev) {
     return run_cmd("ip link set dev %s up", dev);
 }
 

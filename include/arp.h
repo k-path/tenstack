@@ -5,6 +5,13 @@
 #include "ethernet.h"
 #include "list.h"
 
+/* ARP entry states */
+#define ARP_FREE       0 // slot is unused
+#define ARP_WAITING    1 // ARP request sent but no reply yet
+#define ARP_RESOLVED   2 // valid mapping
+
+#define ARP_CACHE_TTL  60 // 1 min timeout 
+
 /* ARP packet format */
 struct arp_header {
     uint16_t hwtype;  // hardware address type, determines link layer type used
@@ -33,7 +40,7 @@ struct arp_cache_entry {
 };
 
 /* creates and sends an ARP request packet */
-int arp_request(uint32_t target_ip);
+int arp_request(uint32_t dip);
 
 /* process incoming ARP packets */
 void arp_process(struct arp_header *hdr, int len);
