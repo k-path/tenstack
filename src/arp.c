@@ -96,20 +96,20 @@ void arp_cache_timer(void) {
 }
 
 /* Create and send an ARP request packet */
-int arp_request(uint32_t dip) {
-    // Allocate buffer for Ethernet frame + ARP header + ARP data
-    uint8_t buffer[ETH_FRAME_LEN];
-    struct eth_header *eth = (struct eth_header *)buffer; // buffer's first bytes is Eternet header
-    struct arp_header *arp = (struct arp_header *)(buffer + sizeof(struct eth_header)); // next set of bytes is arp header
-    struct arp_ipv4 *arp_data = (struct arp_ipv4 *)arp->data; 
-    // so data will be laid out as valid eth frame containing an ARP packet
+// int arp_request(uint32_t dip) {
+//     // allocate buffer for Ethernet frame + ARP header + ARP data
+//     uint8_t buffer[ETH_FRAME_LEN];
+//     struct eth_header *eth = (struct eth_header *)buffer; // buffer's first bytes is Eternet header
+//     struct arp_header *arp = (struct arp_header *)(buffer + sizeof(struct eth_header)); // next set of bytes is arp header
+//     struct arp_ipv4 *arp_data = (struct arp_ipv4 *)arp->data; 
+//     // so data will be laid out as valid eth frame containing an ARP packet
 
 
-    // initialize Ethernet header
-
-
-
+//     // initialize Ethernet header
 
 
 
-}
+
+
+
+// }

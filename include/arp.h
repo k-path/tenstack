@@ -54,4 +54,4 @@ int arp_resolve(uint32_t ip, uint8_t *mac);
 /* handles ethernet frames with ARP EtherType */
 void arp_recv(struct eth_header *frame, int len);
 
-#endif
+#endif /* ARP.H */

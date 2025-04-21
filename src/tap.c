@@ -12,12 +12,6 @@
 #include "utils.h"
 
 
-
-/*
- * alloc_tap: Initialize and configure a TAP device
- * @dev: Name of the TAP device (can be empty string for kernel to choose)
- * Returns: File descriptor for the TAP device or negative value on error
- */
 int alloc_tap(char *dev) {
     struct ifreq ifr;
     int tapfd;
@@ -81,16 +75,12 @@ int configure_tap(char *dev, char *cidr) {
     return 0;
 }
 
-int setup_network_if(char *tap_name, int choose_name, char *cidr) {
-    char dev[IFNAMSIZ];
+int setup_network_if(char *dev, int choose_name, char *cidr) {
     int tapfd;
 
     // if specific name is requested, use it, or we just let kernel choose
-    if (!choose_name && tap_name) {
-        strncpy(dev, tap_name, IFNAMSIZ - 1);
-        dev[IFNAMSIZ - 1] = '\0'; // make sure to null terminate
-    } else {
-        dev[0] = '\0';
+    if (choose_name) {
+        dev[0] = '\0';  
     }
 
     // create TAP interface
@@ -112,51 +102,30 @@ int setup_network_if(char *tap_name, int choose_name, char *cidr) {
     return tapfd;
 }
 
-// read raw data from TAP device
 int tap_read(int tapfd, unsigned char *buffer, int len) {
     return read(tapfd, buffer, len);
 }
 
-// 
-// int tap_write(int tapfd, unsigned char *buffer, int len) {
-//     return write(tapfd, buffer, len);
-// }
+int tap_write(int tapfd, unsigned char *buffer, int len) {
+    return write(tapfd, buffer, len);
+}
 
-int main() {
-    int tapfd;
-    char tap_name[IFNAMSIZ] = "tap0";
+int close_tap(int tapfd) {
+    if (tapfd < 0) {
+        return 0; // already closed or invalid
+    }
 
-    tapfd = setup_network_if(tap_name, 0, "192.168.1.1/24");
-    unsigned char buffer[2048];
-    int nread;
-
-    printf("Starting packet loop...\n");
-
-    while (1) {
-        nread = tap_read(tapfd, buffer, sizeof(buffer));
-        if (nread > 0) {
-            printf("Received %d bytes\n", nread);
-            // parse and process packet here
-            struct eth_header *eth = (struct eth_header *)buffer;
-            printf("Src MAC: %02x:%02x:%02x:%02x:%02x:%02x\n", 
-                eth->src_mac[0], eth->src_mac[1], eth->src_mac[2], 
-                eth->src_mac[3], eth->src_mac[4], eth->src_mac[5]);
-            printf("Dest MAC: %02x:%02x:%02x:%02x:%02x:%02x\n", 
-                eth->dest_mac[0], eth->dest_mac[1], eth->dest_mac[2], 
-                eth->dest_mac[3], eth->dest_mac[4], eth->dest_mac[5]);
-            printf("EtherType: 0x%04x\n", ntohs(eth->eth_type));
-             
-             
-        }
+    // close file descriptor
+    int result;
+    if ((result = close(tapfd)) < 0) {
+        perror("Error closing TAP device");
+        return -1;
     }
 
     return 0;
-    
 }
 
 
 
-// int close_tap() {
 
-// }
 
