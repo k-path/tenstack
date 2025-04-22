@@ -2,6 +2,7 @@
 #define NETDEV_H
 
 #include <stdint.h>
+#include <linux/if.h>
 
 #include "pktbuf.h"
 

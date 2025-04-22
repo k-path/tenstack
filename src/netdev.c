@@ -5,8 +5,6 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <pthread.h>
-#include <net/if.h>
-#include <linux/if.h>
 #include <linux/if_tun.h>
 #include <arpa/inet.h>
 #include <errno.h>
@@ -42,14 +40,14 @@ void netdev_init(void) {
         &tap.dev.hwaddr[5]);
 
     // set IP address and netmask 
-    if (inet_pton(AF_INET, "192.168.1.1", &tap.dev.addr) <= 0) {
+    if (inet_pton(AF_INET, "10.0.0.1", &tap.dev.addr) <= 0) {
         fprintf(stderr, "Failed to convert IP address\n");
-        return -1;
+        return;
     }
 
     if (inet_pton(AF_INET, "255.255.255.0", &tap.dev.netmask) <= 0) {
         fprintf(stderr, "Failed to convert netmask\n");
-        return -1;
+        return;
     }
 
     tap.dev.mtu = NETDEV_MTU;
@@ -59,7 +57,7 @@ void netdev_init(void) {
 
 /* Initialize and open the TAP interface */
 int tapdev_init(const char *name) {
-    char *cidr = "192.168.1.1/24";
+    char *cidr = "10.0.0.1/24";
     char dev[IFNAMSIZ];
 
     // copy name to buffer 
@@ -133,4 +131,36 @@ int netdev_poll(void) {
 
         return 0; // no packets available
     }
+}
+
+void *netdev_rx_loop(void *arg){
+    netdev_dbg("RX thread starting");
+
+    while (running) {
+        // poll for packets
+        netdev_poll();
+
+        // sleep to avoid consuming too much CPU
+        usleep(1000);
+        
+    }
+    netdev_dbg("RX thread exiting");
+    return NULL;
+}
+
+void netdev_close(void) {
+    // signal RX thread to stop
+    running = 0;
+
+    // close TAP dev 
+    if (tap.fd >= 0) {
+        close_tap(tap.fd);
+        tap.fd = -1;
+    }
+
+    netdev_dbg("Network device resources cleaned up");
+}
+
+struct netdev *netdev_get(void) {
+    return &tap.dev;
 }

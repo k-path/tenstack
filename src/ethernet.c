@@ -55,7 +55,7 @@ void ethernet_rx(struct pktbuf *pkt) {
     struct eth_header *hdr;
     uint16_t ethertype;
 
-    // make sure we habe at least enough data for an Eth header
+    // make sure we have at least enough data for an Eth header
     if (pkt->len < sizeof(struct eth_header)) {
         eth_dbg("Packet too short for Ethernet header (%d bytes)", pkt->len);
         free_pktbuf(pkt);
@@ -80,12 +80,12 @@ void ethernet_rx(struct pktbuf *pkt) {
     switch (ethertype) {
         case ETH_P_ARP:
             eth_dbg("Dispatching ARP packet");
-            // arp_recv(pkt); uncomment when impl arp_recv
+            arp_recv(pkt);
             break;
         case ETH_P_IP:
             eth_dbg("Dispatching IP packet");
             // ip_recv(pkt); uncomment when impl IP
-            free_pktbut(pkt); // leave until IP is impl
+            free_pktbuf(pkt); // leave until IP is impl
             break;
         default:
             eth_dbg("Unsupported ethertype 0x%04x", ethertype);

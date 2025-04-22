@@ -2,6 +2,7 @@
 #define ETHERNET_H
 
 #include <stdint.h>
+#include <linux/if_ether.h>
 
 #include "pktbuf.h"
 
