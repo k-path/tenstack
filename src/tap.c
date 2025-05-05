@@ -51,10 +51,10 @@ static int set_ipaddr(char *dev, char *cidr) {
 }
 
 /* adds a route via TAP if */
-static int set_route(char *dev, char *cidr) {
+/* static int set_route(char *dev, char *cidr) {
     return run_cmd("ip route add %s dev %s", cidr, dev);
 }
-
+ */
 /* Brings up the TAP if */
 static int set_up_if(char *dev) {
     return run_cmd("ip link set dev %s up", dev);

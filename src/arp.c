@@ -18,7 +18,7 @@ static const uint8_t ETH_BROADCAST_ADDR[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
     printf("ARP: " fmt "\n", ##__VA_ARGS__)
 
 /* Print IP address in dotted notation */
-static void print_ip(const char *name, uint32_t ip) {
+/* static void print_ip(const char *name, uint32_t ip) {
     unsigned char bytes[4];
     bytes[0] = ip & 0xFF;
     bytes[1] = (ip >> 8) & 0XFF;
@@ -26,9 +26,8 @@ static void print_ip(const char *name, uint32_t ip) {
     bytes[3] = (ip >> 24) & 0XFF;
 
     printf("%s: %d.%d.%d.%d\n", name, bytes[0], bytes[1], bytes[2], bytes[3]);
-}
+} */
 
-/* Initialize ARP module */
 int arp_init(void) {
     // arp_cache already initialized by LIST_HEAD
     arp_dbg("ARP module initialized\n");
@@ -83,7 +82,7 @@ void arp_update_cache(uint32_t ip, uint8_t *mac) {
 
     if (entry) {
         // update existing entry
-        memcpy(entry->mac, mac, sizeof(mac));
+        memcpy(entry->mac, mac, sizeof(entry->mac));
         entry->ttl = ARP_CACHE_TTL; // reset ttl
         entry->state = ARP_RESOLVED;
         arp_dbg("Updated ARP cache entry for IP %s", ip_str);

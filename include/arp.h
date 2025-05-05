@@ -43,6 +43,9 @@ struct arp_cache_entry {
     int state; // state of the entry (complete, incomplete)
 };
 
+/* Initialize ARP module */
+int arp_init(void);
+
 /* creates and sends an ARP request packet */
 int arp_request(uint32_t dip);
 
@@ -51,6 +54,9 @@ void arp_process(struct arp_header *hdr, int len);
 
 /* update ARP cache with new IP-to-MAC mapping  */
 void arp_update_cache(uint32_t ip, uint8_t *mac);
+
+/* Clean up expired ARP cache entries */
+void arp_cache_timer(void);
 
 /* resolves an IP address to a MAC address for sending packets */
 int arp_resolve(uint32_t ip, uint8_t *mac);

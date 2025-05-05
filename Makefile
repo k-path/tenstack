@@ -1,6 +1,6 @@
 CC = gcc
-# CFLAGS = -Wall -Werror -Iinclude -pthread
-CFLAGS = -Wall -Iinclude -pthread
+CFLAGS = -Wall -Werror -Iinclude -pthread
+# CFLAGS = -Wall -Iinclude -pthread
 SRCDIR = src
 OBJDIR = obj
 
@@ -12,6 +12,10 @@ SOURCES = $(SRCDIR)/tap.c \
 		  $(SRCDIR)/ethernet.c \
 		  $(SRCDIR)/arp.c \
 		  $(SRCDIR)/main.c \
+		  $(SRCDIR)/ip.c \
+		  $(SRCDIR)/ip_in.c \
+		  $(SRCDIR)/ip_out.c \
+		  $(SRCDIR)/icmp.c \
 
 # convert source files to object files
 OBJECTS = $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SOURCES))

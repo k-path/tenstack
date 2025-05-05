@@ -57,7 +57,7 @@ void netdev_init(void) {
 
 /* Initialize and open the TAP interface */
 int tapdev_init(const char *name) {
-    char *cidr = "10.0.0.1/24";
+    char *cidr = "10.0.0.2/24";
     char dev[IFNAMSIZ];
 
     // copy name to buffer 

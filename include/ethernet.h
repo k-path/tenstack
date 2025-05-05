@@ -18,7 +18,7 @@ struct eth_header {
     uint8_t dest_mac[6]; // destination ether addr , 1 byte
     uint8_t src_mac[6]; // source ether addr
     uint16_t eth_type; // 2 bytes, packet type ID, indicates either length or type of the payload (e.g. IPv4, ARP), value is less than that it contains length of payload
-} __attribute__((packed)); 
+} __attribute__((packed)); // dont add padding between struct members. Needed for protocol header since each byte pos matters 
 
 /* Transmit an Ethernet frame */
 int ethernet_tx(struct pktbuf *pkt, const uint8_t *dst_mac, uint16_t ethertype);

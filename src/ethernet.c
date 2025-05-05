@@ -6,6 +6,7 @@
 #include "ethernet.h"
 #include "arp.h"
 #include "netdev.h"
+#include "ip.h"
 
 /* debug output macro */
 #define eth_dbg(fmt, ...) \
@@ -84,8 +85,7 @@ void ethernet_rx(struct pktbuf *pkt) {
             break;
         case ETH_P_IP:
             eth_dbg("Dispatching IP packet");
-            // ip_recv(pkt); uncomment when impl IP
-            free_pktbuf(pkt); // leave until IP is impl
+            ip_recv(pkt);
             break;
         default:
             eth_dbg("Unsupported ethertype 0x%04x", ethertype);

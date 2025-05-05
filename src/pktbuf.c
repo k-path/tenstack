@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "pktbuf.h"
@@ -57,7 +58,7 @@ void pktbuf_hold(struct pktbuf *pkt) {
 }
 
 int pktbuf_reserve(struct pktbuf *pkt, uint32_t len) {
-    if (len > pkt->size || !pkt) {
+    if (!pkt || len > pkt->size) {
         return -1;
     }
 
@@ -66,7 +67,7 @@ int pktbuf_reserve(struct pktbuf *pkt, uint32_t len) {
 }
 
 void *pktbuf_push(struct pktbuf *pkt, uint32_t len) {
-    if (pkt->data - len < pkt->head || !pkt) {
+    if (!pkt || pkt->data - len < pkt->head) {
         return NULL;
     }
 
@@ -77,7 +78,7 @@ void *pktbuf_push(struct pktbuf *pkt, uint32_t len) {
 }
 
 void *pktbuf_pull(struct pktbuf *pkt, uint32_t len) {
-    if (len > pkt->len || !pkt) {
+    if (!pkt || len > pkt->len) {
         return NULL;
     }
 
@@ -90,7 +91,7 @@ void *pktbuf_pull(struct pktbuf *pkt, uint32_t len) {
 }
 
 void *pktbuf_put(struct pktbuf *pkt, uint32_t len) {
-    if (pkt->data + pkt->len + len > pkt->end || !pkt) {
+    if (!pkt || pkt->data + pkt->len + len > pkt->end) {
         return NULL;
     }
 
